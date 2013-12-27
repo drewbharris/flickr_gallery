@@ -1,10 +1,12 @@
+path = File.expand_path(File.dirname(__FILE__))
+
 require 'rack'
 require 'logger'
-require './lib/controller'
-require './lib/flickr'
+require "#{path}/lib/controller"
+require "#{path}/lib/flickr"
 require 'rack/handler'
 
-LOGFILE = "rack.log"
+LOGFILE = "#{path}/rack.log"
 PORT = 9292
 
 # set up the app
@@ -20,3 +22,5 @@ end
 Flickr.init do 
 	Rack::Handler.get(:puma).run(builder, :Port => PORT)
 end
+
+

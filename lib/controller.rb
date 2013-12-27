@@ -1,6 +1,8 @@
+path = File.expand_path(File.dirname(__FILE__))
+
 require 'rack'
 require 'json'
-require './lib/template'
+require "#{path}/template"
 
 module Controller
     URL_MAP = {
