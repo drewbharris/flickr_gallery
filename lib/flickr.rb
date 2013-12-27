@@ -19,7 +19,7 @@ module Flickr
 
 		# every 12 hours, fetch the photosets again
 		@scheduler = Rufus::Scheduler.new
-		@scheduler.every '20s' do
+		@scheduler.every '12h' do
 			puts 'Updating photos...'
 			fetch
 		end
