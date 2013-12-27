@@ -30,7 +30,7 @@ module Flickr
 		block.call
 	end
 
-	def self.photosets
+	def self.photosets(set_name = nil)
 		return @photosets
 	end
 
