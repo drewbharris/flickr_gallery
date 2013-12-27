@@ -12,8 +12,10 @@ module Flickr
 
 	def self.init(&block)
 
+		puts "Fetching photos from flickr..."
 		# get all of the [public] photos for a certain username and load them into @photosets
 		fetch
+		puts "Done."
 
 		# @todo: store the photos in a local database
 
@@ -33,13 +35,13 @@ module Flickr
 	end
 
 	def self.fetch
-		@photosets = {}
+		new_photosets = []
 
 		flickr_nsid = get_user_id
 		flickr_photosets = get_photosets(flickr_nsid)
 		flickr_photosets['photosets']['photoset'].each do |flickr_set|
-			set_id = flickr_set['id']
-			@photosets[set_id] = {
+			set = {
+				'id' => flickr_set['id'],
 				'title' => flickr_set['title']['_content'],
 				'short_title' => flickr_set['title']['_content'].gsub(" ","_").downcase,
 				'photos' => [],
@@ -48,13 +50,16 @@ module Flickr
 			}
 			flickr_photos = get_photos_by_photoset(flickr_set['id'])
 			flickr_photos['photoset']['photo'].each do |flickr_photo|
-				@photosets[set_id]['photos'].push({
+				set['photos'].push({
 					'id' => flickr_photo['id'],
 					'title' => flickr_photo['title'],
 					'url' => flickr_photo['url_l']
 				})
 			end
+			new_photosets.push(set)
 		end
+
+		@photosets = new_photosets.dup
 	end
 
 	def self.get_user_id

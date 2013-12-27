@@ -1,1 +1,6 @@
-{{photosets}}
+{% for set in photosets %}
+	{{set.title}}<br>
+	{% for photo in set.photos %}
+		<img src="{{photo.url}}"><br>
+	{% endfor %}
+{% endfor %}
