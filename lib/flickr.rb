@@ -12,21 +12,17 @@ module Flickr
 
 	def self.init(&block)
 
-		puts "Fetching photos from flickr..."
-		# get all of the [public] photos for a certain username and load them into @photosets
-		fetch
-		puts "Done. Sets:"
-		@photosets.each do |set|
-			puts set['short_title']
-		end
-
-		# @todo: store the photos in a local database
+		Db.init
 
 		# every 12 hours, fetch the photosets again
 		@scheduler = Rufus::Scheduler.new
+
+		@scheduler.in '10s' do
+			update
+		end
+
 		@scheduler.every '12h' do
-			puts 'Updating photos...'
-			fetch
+			update
 		end
 
 		# call the do block
@@ -38,6 +34,16 @@ module Flickr
 			return @photosets.find {|set| set['short_title'] == set_title}
 		else
 			return @photosets
+		end
+	end
+
+	def self.update
+		puts 'Updating photos...'
+		fetch
+		persist
+		puts 'Done. Sets:'
+		@photosets.each do |set|
+			puts set['short_title']
 		end
 	end
 
@@ -84,10 +90,19 @@ module Flickr
 	end
 
 	def self.get_photos_by_photoset(photoset_id)
-		uri = URI("http://api.flickr.com/services/rest/?api_key=#{API_KEY}&method=flickr.photosets.getPhotos&format=json&photoset_id=#{photoset_id}&extras=url_l")
+		uri = URI("http://api.flickr.com/services/rest/?api_key=#{API_KEY}&method=flickr.photosets.getPhotos&format=json&photoset_id=#{photoset_id}&extras=url_l,url_t,url_s,date_taken,date_upload")
 		body = Net::HTTP.get_response(uri).body
 		body.slice!('jsonFlickrApi(')
 		return JSON.parse(body[0...-1])
+	end
+
+	def self.persist
+		Db.query("
+			INSERT OR IGNORE INTO photosets (id, create_date, title, short_title, description) VALUES ()
+		")
+		Db.query("
+			INSERT OR IGNORE INTO photos (id, title, url_large, url_thumb, url_small, create_date, taken_date) VALUES ()
+		")
 	end
 
 end

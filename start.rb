@@ -4,6 +4,7 @@ require 'rack'
 require 'logger'
 require "#{path}/lib/controller"
 require "#{path}/lib/flickr"
+require "#{path}/lib/db"
 require 'rack/handler'
 
 LOGFILE = "#{path}/rack.log"
