@@ -8,7 +8,7 @@ require "#{path}/lib/db"
 require 'rack/handler'
 
 LOGFILE = "#{path}/rack.log"
-PORT = 9292
+PORT = ENV['PORT'] || 9292
 
 # set up the app
 controller = Rack::URLMap.new(Controller::URL_MAP)
