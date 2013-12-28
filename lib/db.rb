@@ -31,10 +31,9 @@ module Db
 					id INTEGER PRIMARY KEY UNIQUE,
 					title TEXT,
 					url_large TEXT,
-					url_thumb TEXT,
-					url_small TEXT
+					url_medium TEXT,
+					url_small TEXT,
 					create_date INTEGER
-					taken_date INTEGER
 				)
 			")
 			puts "Done"

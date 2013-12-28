@@ -63,10 +63,14 @@ module Flickr
 			}
 			flickr_photos = get_photos_by_photoset(flickr_set['id'])
 			flickr_photos['photoset']['photo'].each do |flickr_photo|
+				puts flickr_photo.inspect
 				set['photos'].push({
 					'id' => flickr_photo['id'],
 					'title' => flickr_photo['title'],
-					'url' => flickr_photo['url_l']
+					'url_large' => flickr_photo['url_l'],
+					'url_medium' => flickr_photo['url_m'],
+					'url_small' => flickr_photo['url_s'],
+					'create_date' => flickr_photo['dateupload']
 				})
 			end
 			new_photosets.push(set)
@@ -90,19 +94,26 @@ module Flickr
 	end
 
 	def self.get_photos_by_photoset(photoset_id)
-		uri = URI("http://api.flickr.com/services/rest/?api_key=#{API_KEY}&method=flickr.photosets.getPhotos&format=json&photoset_id=#{photoset_id}&extras=url_l,url_t,url_s,date_taken,date_upload")
+		uri = URI("http://api.flickr.com/services/rest/?api_key=#{API_KEY}&method=flickr.photosets.getPhotos&format=json&photoset_id=#{photoset_id}&extras=url_l,url_m,url_s,date_upload")
 		body = Net::HTTP.get_response(uri).body
 		body.slice!('jsonFlickrApi(')
 		return JSON.parse(body[0...-1])
 	end
 
 	def self.persist
-		Db.query("
-			INSERT OR IGNORE INTO photosets (id, create_date, title, short_title, description) VALUES ()
-		")
-		Db.query("
-			INSERT OR IGNORE INTO photos (id, title, url_large, url_thumb, url_small, create_date, taken_date) VALUES ()
-		")
+		puts "Persisting to database..."
+		@photosets.each do |set|
+			Db.query("
+				INSERT OR IGNORE INTO photosets (id, create_date, title, short_title, description)
+				VALUES (#{set['id']}, #{set['create_date']}, '#{set['title']}', '#{set['short_title']}', '#{set['description']}')
+			")
+			set['photos'].each do |photo|
+				Db.query("
+					INSERT OR IGNORE INTO photos (id, title, url_large, url_medium, url_small, create_date)
+					VALUES (#{photo['id']}, '#{photo['title']}', '#{photo['url_large']}', '#{photo['url_medium']}', '#{photo['url_small']}', #{photo['create_date']})
+				")
+			end
+		end
 	end
 
 end
