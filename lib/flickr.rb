@@ -105,6 +105,8 @@ module Flickr
 
 	def self.persist
 		puts "Persisting to database..."
+		Db.query("DELETE FROM photosets")
+		Db.query("DELETE FROM photos")
 		@photosets.each do |set|
 			Db.query("
 				INSERT OR IGNORE INTO photosets (id, create_date, title, short_title, description)
