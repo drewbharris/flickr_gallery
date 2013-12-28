@@ -90,11 +90,11 @@ module Flickr
 					}
 				end
 			end
-			set['photos'] = set['photos'].sort_by {|photo| photo['create_date']}
+			set['photos'] = set['photos'].sort {|first, second| second['id'] <=> first['id']}
 			new_photosets.push(set)
 		end
 
-		@photosets = new_photosets.dup.sort_by {|set| set['id']}
+		@photosets = new_photosets.dup.sort {|first, second| first['id'] <=> second['id']}
 	end
 
 	def self.get_user_id
@@ -183,7 +183,7 @@ module Flickr
 			end
 		end
 
-		@photosets = photosets_by_id.values.dup.sort_by {|set| set['id']}
+		@photosets = photosets_by_id.values.dup.sort {|first, second| second['id'] <=> first['id']}
 
 		@photosets.each do |set|
 			set['photos'] = set['photos'].sort_by {|photo| photo['create_date']}
