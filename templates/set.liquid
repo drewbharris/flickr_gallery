@@ -10,8 +10,12 @@
 				padding: 10px 0 10px 0;
 			}
 			.set-title {
-				margin: 10px 0 10px 0;
+				margin: 10px 0 0 0;
 				font-size: 2em;
+			}
+			.back {
+				display: inline-block;
+				margin-bottom: 10px;
 			}
 		</style>
 	</head>
@@ -20,6 +24,10 @@
 			<div class="set-title">
 				{{photoset.title}} // {{photoset.create_date_str}}
 			</div>
+			<div class="set-description">
+				{{photoset.description}}
+			</div>
+			<a href="/" class="back">back</a>
 			<div class="photos">
 				{% for photo in photoset.photos %}
 					<img src="{{photo.url_large}}"><br>
