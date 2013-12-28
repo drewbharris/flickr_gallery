@@ -29,6 +29,7 @@ module Db
 			@connection.execute("
 				CREATE TABLE photos (
 					id INTEGER PRIMARY KEY UNIQUE,
+					photoset_id INTEGER,
 					title TEXT,
 					url_large TEXT,
 					url_medium TEXT,

@@ -12,7 +12,11 @@ module Flickr
 
 	def self.init(&block)
 
+		# initialize the database
 		Db.init
+
+		# load the photos from the database
+		restore
 
 		# every 12 hours, fetch the photosets again
 		@scheduler = Rufus::Scheduler.new
@@ -63,7 +67,6 @@ module Flickr
 			}
 			flickr_photos = get_photos_by_photoset(flickr_set['id'])
 			flickr_photos['photoset']['photo'].each do |flickr_photo|
-				puts flickr_photo.inspect
 				set['photos'].push({
 					'id' => flickr_photo['id'],
 					'title' => flickr_photo['title'],
@@ -109,11 +112,50 @@ module Flickr
 			")
 			set['photos'].each do |photo|
 				Db.query("
-					INSERT OR IGNORE INTO photos (id, title, url_large, url_medium, url_small, create_date)
-					VALUES (#{photo['id']}, '#{photo['title']}', '#{photo['url_large']}', '#{photo['url_medium']}', '#{photo['url_small']}', #{photo['create_date']})
+					INSERT OR IGNORE INTO photos (id, photoset_id, title, url_large, url_medium, url_small, create_date)
+					VALUES (#{photo['id']}, #{set['id']}, '#{photo['title']}', '#{photo['url_large']}', '#{photo['url_medium']}', '#{photo['url_small']}', #{photo['create_date']})
 				")
 			end
 		end
+	end
+
+	def self.restore
+		puts "Restoring from database..."
+
+		rows = Db.query("
+			SELECT photos.*, photosets.create_date AS photoset_create_date, photosets.title AS photoset_title, photosets.short_title AS photoset_short_title, photosets.description AS photoset_description
+			FROM photos JOIN photosets ON photosets.id = photos.photoset_id
+		")
+
+		if !rows[0]
+			return update
+		end
+
+		photosets_by_id = {}
+
+		rows.each do |row|
+			if !photosets_by_id[row['photoset_id']]
+				photosets_by_id[row['photoset_id']] = {
+					'id' => row['photoset_id'],
+					'create_date' => row['photoset_create_date'],
+					'title' =>row['photoset_title'],
+					'short_title' => row['photoset_short_title'],
+					'description' => row['photoset_description'],
+					'photos' => []
+				}
+			end
+			photosets_by_id[row['photoset_id']]['photos'].push({
+				'id' => row['id'],
+				'title' => row['title'],
+				'url_large' => row['url_large'],
+				'url_medium' => row['url_medium'],
+				'url_small' => row['url_small'],
+				'create_date' => row['create_date']
+			})
+		end
+
+		@photosets = photosets_by_id.values.dup
+
 	end
 
 end
