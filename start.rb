@@ -14,7 +14,7 @@ PORT = ENV['PORT'] || 9292
 controller = Rack::URLMap.new(Controller::URL_MAP)
 builder = Rack::Builder.new do
 	use(Rack::CommonLogger)
-	use(Rack::Static, {:urls => ["/img", "/js", "/css"], :root => "public"})
+	use(Rack::Static, {:urls => ["/img", "/js", "/css"], :root => "#{path}/public"})
 	Logger.new(LOGFILE)
 	run(controller)
 end

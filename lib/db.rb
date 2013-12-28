@@ -23,7 +23,8 @@ module Db
 					create_date INTEGER,
 					title TEXT,
 					short_title TEXT,
-					description TEXT
+					description TEXT,
+					primary_photo_id INTEGER
 				)
 			")
 			@connection.execute("
