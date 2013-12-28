@@ -14,9 +14,15 @@ module Controller
     def self.set(env)
         request = Rack::Request.new(env)
 
-        set_name = request.path.match(/^\/set\/(.*)/)
+        set_title = request.path.match(/^\/set\/(.*)/)[1]
+        photoset = Flickr.photosets(set_title)
+
+        if !photoset
+            return not_found
+        end
+
         body = Template.render(:set, {
-            'photosets' => Flickr.photosets(set_name)
+            'photoset' => photoset
         })
         return [200, {'Content-Type' => 'text/html'}, [body]]
     end
@@ -24,7 +30,11 @@ module Controller
     def self.index(env)
         request = Rack::Request.new(env)
 
-        return [200, {'Content-Type' => 'text/html'}, ["hey"]]
+        body = Template.render(:index, {
+            'photosets' => Flickr.photosets
+        })
+
+        return [200, {'Content-Type' => 'text/html'}, [body]]
     end
 
     def self.not_found

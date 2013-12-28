@@ -15,7 +15,10 @@ module Flickr
 		puts "Fetching photos from flickr..."
 		# get all of the [public] photos for a certain username and load them into @photosets
 		fetch
-		puts "Done."
+		puts "Done. Sets:"
+		@photosets.each do |set|
+			puts set['short_title']
+		end
 
 		# @todo: store the photos in a local database
 
@@ -30,8 +33,12 @@ module Flickr
 		block.call
 	end
 
-	def self.photosets(set_name = nil)
-		return @photosets
+	def self.photosets(set_title = nil)
+		if set_title
+			return @photosets.find {|set| set['short_title'] == set_title}
+		else
+			return @photosets
+		end
 	end
 
 	def self.fetch

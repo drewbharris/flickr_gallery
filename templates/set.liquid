@@ -17,16 +17,14 @@
 	</head>
 	<body>
 		<div class="container">
-			{% for set in photosets %}
-				<div class="set-title">
-					{{set.title}}
-				</div>
-				<div class="photos">
-					{% for photo in set.photos %}
-						<img src="{{photo.url}}"><br>
-					{% endfor %}
-				</div>
-			{% endfor %}
+			<div class="set-title">
+				{{photoset.title}}
+			</div>
+			<div class="photos">
+				{% for photo in photoset.photos %}
+					<img src="{{photo.url}}"><br>
+				{% endfor %}
+			</div>
 		</div>
 	</body>
 </html>
