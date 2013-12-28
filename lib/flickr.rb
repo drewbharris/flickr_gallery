@@ -63,6 +63,7 @@ module Flickr
 				'short_title' => flickr_set['title']['_content'].gsub(" ","_").downcase,
 				'photos' => [],
 				'create_date' => flickr_set['date_create'],
+				'create_date_str' => Time.at(flickr_set['date_create'].to_i).strftime("%m.%d.%Y"),
 				'description' => flickr_set['description']['_content']
 			}
 			flickr_photos = get_photos_by_photoset(flickr_set['id'])
@@ -76,10 +77,11 @@ module Flickr
 					'create_date' => flickr_photo['dateupload']
 				})
 			end
+			set['photos'] = set['photos'].sort_by {|photo| photo['create_date']}
 			new_photosets.push(set)
 		end
 
-		@photosets = new_photosets.dup
+		@photosets = new_photosets.dup.sort_by {|set| set['id']}
 	end
 
 	def self.get_user_id
@@ -140,6 +142,7 @@ module Flickr
 				photosets_by_id[row['photoset_id']] = {
 					'id' => row['photoset_id'],
 					'create_date' => row['photoset_create_date'],
+					'create_date_str' => Time.at(row['photoset_create_date']).strftime("%m.%d.%Y"),
 					'title' =>row['photoset_title'],
 					'short_title' => row['photoset_short_title'],
 					'description' => row['photoset_description'],
@@ -156,7 +159,11 @@ module Flickr
 			})
 		end
 
-		@photosets = photosets_by_id.values.dup
+		@photosets = photosets_by_id.values.dup.sort_by {|set| set['id']}
+
+		@photosets.each do |set|
+			set['photos'] = set['photos'].sort_by {|photo| photo['create_date']}
+		end
 
 	end
 

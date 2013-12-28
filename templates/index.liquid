@@ -14,7 +14,7 @@
 	<body>
 		<div class="container">
 			{% for set in photosets %}
-				<a href="/set/{{set.short_title}}">{{set.title}}</a><br>
+				<a href="/set/{{set.short_title}}">{{set.title}}</a> ({{set.create_date_str}})<br>
 			{% endfor %}
 		</div>
 	</body>
