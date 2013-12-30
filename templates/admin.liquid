@@ -1,0 +1,48 @@
+<html>
+	<head>
+		<style type="text/css">
+			@font-face {
+				font-family: 'Cutive Mono';
+				font-style: normal;
+				font-weight: 400;
+				src: local('Cutive Mono'), local('CutiveMono-Regular'), url('/css/CutiveMono-Regular.ttf') format('truetype');
+			}
+			body {
+				font-family: 'Cutive Mono', serif;
+				letter-spacing: -1px;
+			}
+			.container {
+				width: 1024px;
+				margin: 0 auto;
+				padding: 10px 0 10px 0;
+			}
+		</style>
+		<script src="/js/jquery-1.10.2.min.js"></script>
+	</head>
+	<body>
+		<div class="container">
+			<div id="status"></div>
+			<button id="update">update</button>
+		</div>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("#update").click(function(){
+					$("#status").html("updating...");
+					$.ajax({
+						url: '/api/v1/admin/update',
+						dataType: 'json',
+						success: function(data, textStatus, jqXHR ){
+							console.log('success');
+							$("#status").html("updating... done");
+						},
+						error: function(jqXHR, textStatus, errorThrown){
+							console.log('error');
+							$("#status").html("error");
+						}
+					});
+				});
+			});
+		</script>
+	</body>
+</html>
+

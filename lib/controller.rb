@@ -7,10 +7,10 @@ require 'pp'
 
 module Controller
     URL_MAP = {
-        '/' => proc {|env| Controller.index(env)},
-        '/set' => proc {|env| Controller.set(env)},
         '/admin' => proc {|env| Controller.admin(env)},
-        '/api/v1/admin/update' => proc {|env| API.admin_update(env)}
+        '/api/v1/admin/update' => proc {|env| API.admin_update(env)},
+        '/set' => proc {|env| Controller.set(env)},
+        '/' => proc {|env| Controller.index(env)}
     }
 
     def self.set(env)
@@ -32,9 +32,24 @@ module Controller
     def self.index(env)
         request = Rack::Request.new(env)
 
-        body = Template.render(:index, {
-            'photosets' => Flickr.photosets
-        })
+        # year and set title, or year, or index
+        if request.path.match(/^\/(\d{4})\/(.*)/)
+            set_title = request.path.match(/^\/(\d{4})\/(.*)/)[2]
+            photoset = Flickr.photosets(set_title)
+            body = Template.render(:set, {
+                'photoset' => photoset
+            })
+        elsif request.path.match(/^\/(\d{4})/)
+            year = request.path.match(/^\/(\d{4})/)[1]
+            photosets = Flickr.photosets(nil, year)
+            body = Template.render(:index, {
+                'photosets' => photosets
+            })
+        else
+            body = Template.render(:index, {
+                'photosets' => Flickr.photosets
+            })
+        end
 
         return [200, {'Content-Type' => 'text/html'}, [body]]
     end

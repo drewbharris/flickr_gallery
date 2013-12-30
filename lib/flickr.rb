@@ -34,9 +34,11 @@ module Flickr
 		block.call
 	end
 
-	def self.photosets(set_title = nil)
+	def self.photosets(set_title = nil, year = nil)
 		if set_title
 			return @photosets.find {|set| set['short_title'] == set_title}
+		elsif year
+			return @photosets.find_all {|set| Time.at(set['create_date'].to_i).year == year.to_i}
 		else
 			return @photosets
 		end
@@ -66,6 +68,7 @@ module Flickr
 				'photos' => [],
 				'create_date' => flickr_set['date_create'],
 				'create_date_str' => Time.at(flickr_set['date_create'].to_i).strftime("%m.%d.%Y"),
+				'create_year' => Time.at(flickr_set['date_create'].to_i).year,
 				'description' => flickr_set['description']['_content']
 			}
 			# fetch and add in the photos
@@ -157,6 +160,7 @@ module Flickr
 					'id' => row['photoset_id'],
 					'create_date' => row['photoset_create_date'],
 					'create_date_str' => Time.at(row['photoset_create_date']).strftime("%m.%d.%Y"),
+					'create_year' => Time.at(row['photoset_create_date'].to_i).year,
 					'title' => row['photoset_title'],
 					'short_title' => row['photoset_short_title'],
 					'description' => row['photoset_description'],
