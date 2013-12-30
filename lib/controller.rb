@@ -9,6 +9,8 @@ module Controller
     URL_MAP = {
         '/' => proc {|env| Controller.index(env)},
         '/set' => proc {|env| Controller.set(env)},
+        '/admin' => proc {|env| Controller.admin(env)},
+        '/api/v1/admin/update' => proc {|env| API.admin_update(env)}
     }
 
     def self.set(env)
@@ -37,10 +39,27 @@ module Controller
         return [200, {'Content-Type' => 'text/html'}, [body]]
     end
 
+    def self.admin(env)
+        request = Rack::Request.new(env)
+
+        body = Template.render(:admin, {})
+
+        return [200, {'Content-Type' => 'text/html'}, [body]]
+    end
+
     def self.not_found
         return [404, {'Content-Type' => 'text/plain'}, ["not found"]]
     end
 
+end
+
+module API
+    def self.admin_update(env)
+        Flickr.update
+        return [200, {'Content-Type' => 'application/json'}, [{
+            'ok' => true
+        }.to_json]]
+    end
 end
 
 
