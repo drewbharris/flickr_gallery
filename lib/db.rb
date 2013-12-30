@@ -2,7 +2,7 @@ require 'sqlite3'
 
 module Db
 
-	NAME = 'flickr_gallery.db'
+	NAME = 'gallery.db'
 
 	@connection = nil
 
@@ -21,6 +21,7 @@ module Db
 				CREATE TABLE photosets (
 					id INTEGER PRIMARY KEY UNIQUE,
 					create_date INTEGER,
+					create_year INTEGER,
 					title TEXT,
 					short_title TEXT,
 					description TEXT,

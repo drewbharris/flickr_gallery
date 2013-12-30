@@ -62,6 +62,7 @@ module Flickr
 		flickr_photosets = get_photosets(flickr_nsid)
 		flickr_photosets['photosets']['photoset'].each do |flickr_set|
 			# build the photoset
+			create_year_override = nil
 			set = {
 				'id' => flickr_set['id'],
 				'title' => flickr_set['title']['_content'],
@@ -69,13 +70,14 @@ module Flickr
 				'photos' => [],
 				'create_date' => flickr_set['date_create'],
 				'create_date_str' => Time.at(flickr_set['date_create'].to_i).strftime("%m.%d.%Y"),
-				'create_year' => Time.at(flickr_set['date_create'].to_i).year,
 				'description' => flickr_set['description']['_content']
 			}
 			# fetch and add in the photos
 			flickr_photos = get_photos_by_photoset(flickr_set['id'])
 			flickr_photos['photoset']['photo'].each do |flickr_photo|
-				if flickr_photo['tags'].split(" ").include?(FLICKR_INCLUDE_TAG)
+				tags = flickr_photo['tags'].split(" ")
+				create_year_override = (tag = tags.find {|t| t.match(/^year:(\d{4})/)}) && tag.match(/^year:(\d{4})/)[1]
+				if tags.include?(FLICKR_INCLUDE_TAG)
 					set['photos'].push({
 						'id' => flickr_photo['id'],
 						'title' => flickr_photo['title'],
@@ -96,6 +98,7 @@ module Flickr
 					end
 				end
 			end
+			set['create_year'] = create_year_override || Time.at(flickr_set['date_create'].to_i).year
 			set['photos'] = set['photos'].sort_by {|photo| photo['create_date']}
 			new_photosets.push(set)
 		end
@@ -129,8 +132,8 @@ module Flickr
 		Db.query("DELETE FROM photos")
 		@photosets.each do |set|
 			Db.query("
-				INSERT OR IGNORE INTO photosets (id, create_date, title, short_title, description, primary_photo_id)
-				VALUES (#{set['id']}, #{set['create_date']}, '#{set['title']}', '#{set['short_title']}', '#{set['description']}', #{set['primary_photo']['id']})
+				INSERT OR IGNORE INTO photosets (id, create_date, title, short_title, description, primary_photo_id, create_year)
+				VALUES (#{set['id']}, #{set['create_date']}, '#{set['title']}', '#{set['short_title']}', '#{set['description']}', #{set['primary_photo']['id']}, #{set['create_year']})
 			")
 			set['photos'].each do |photo|
 				Db.query("
@@ -146,7 +149,7 @@ module Flickr
 
 		rows = Db.query("
 			SELECT photos.*, photosets.create_date AS photoset_create_date, photosets.title AS photoset_title, photosets.short_title AS photoset_short_title,
-				photosets.description AS photoset_description, photosets.primary_photo_id AS photoset_primary_photo_id
+				photosets.description AS photoset_description, photosets.primary_photo_id AS photoset_primary_photo_id, photosets.create_year AS photoset_create_year
 			FROM photos JOIN photosets ON photosets.id = photos.photoset_id
 		")
 
@@ -162,7 +165,7 @@ module Flickr
 					'id' => row['photoset_id'],
 					'create_date' => row['photoset_create_date'],
 					'create_date_str' => Time.at(row['photoset_create_date']).strftime("%m.%d.%Y"),
-					'create_year' => Time.at(row['photoset_create_date'].to_i).year,
+					'create_year' => row['photoset_create_year'],
 					'title' => row['photoset_title'],
 					'short_title' => row['photoset_short_title'],
 					'description' => row['photoset_description'],
