@@ -1,6 +1,15 @@
 <html>
 	<head>
 		<style type="text/css">
+			a:link, a:active, a:visited {
+				color: black;
+				text-decoration: none;
+			}
+			a:hover {
+				text-decoration: none;
+				color: red;
+			}
+
 			@font-face {
 				font-family: 'Cutive Mono';
 				font-style: normal;
@@ -16,12 +25,24 @@
 				margin: 0 auto;
 				padding: 10px 0 10px 0;
 			}
+			.set {
+				font-size: 2em;
+			}
+			.title {
+				font-size: 3em;
+			}
 		</style>
 	</head>
 	<body>
 		<div class="container">
+			<div class="title">
+				photos<br>
+				-
+			</div>
 			{% for set in photosets %}
-				<a href="/{{set.create_year}}/{{set.short_title}}">{{set.title}}</a> ({{set.create_date_str}})<br>
+				<div class="set">
+					<a href="/{{set.create_year}}/{{set.short_title}}">{{set.create_date_str}} | {{set.title}}</a> <br>
+				</div>
 			{% endfor %}
 		</div>
 	</body>

@@ -1,7 +1,14 @@
 <html>
 	<head>
 		<style type="text/css">
-
+			a:link, a:active, a:visited {
+				color: black;
+				text-decoration: none;
+			}
+			a:hover {
+				text-decoration: none;
+				color: red;
+			}
 			@font-face {
 				font-family: 'Cutive Mono';
 				font-style: normal;
@@ -19,24 +26,36 @@
 				padding: 10px 0 10px 0;
 			}
 			.set-title {
-				margin: 10px 0 0 0;
-				font-size: 2em;
+				font-size: 2.5em;
+				margin-top: 15px;
+				margin-bottom: 10px;
+			}
+			.set-description {
+				margin-bottom: 15px;
 			}
 			.back {
 				display: inline-block;
 				margin-bottom: 10px;
+				font-size: 1.5em;
+			}
+			.title {
+				font-size: 3em;
 			}
 		</style>
 	</head>
 	<body>
 		<div class="container">
-			<div class="set-title">
-				{{photoset.title}} // {{photoset.create_date_str}}
+			<div class="title">
+				<a href="/">photos</a><br>
+				-
 			</div>
+			<div class="set-title">
+				{{photoset.create_date_str}} | {{photoset.title}}
+			</div>
+			<a href="/" class="back">< back</a>
 			<div class="set-description">
 				{{photoset.description}}
 			</div>
-			<a href="/" class="back">back</a>
 			<div class="photos">
 				{% for photo in photoset.photos %}
 					<img src="{{photo.url_large}}"><br>
