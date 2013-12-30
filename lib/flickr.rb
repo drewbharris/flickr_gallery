@@ -7,6 +7,7 @@ module Flickr
 
 	API_KEY = ENV['FLICKR_API_KEY']
 	USERNAME = ENV['FLICKR_USERNAME']
+	FLICKR_INCLUDE_TAG = 'public'
 
 	@photosets = nil
 	@scheduler = nil
@@ -74,29 +75,30 @@ module Flickr
 			# fetch and add in the photos
 			flickr_photos = get_photos_by_photoset(flickr_set['id'])
 			flickr_photos['photoset']['photo'].each do |flickr_photo|
-				set['photos'].push({
-					'id' => flickr_photo['id'],
-					'title' => flickr_photo['title'],
-					'url_large' => flickr_photo['url_l'],
-					'url_medium' => flickr_photo['url_m'],
-					'url_small' => flickr_photo['url_s'],
-					'create_date' => flickr_photo['dateupload']
-				})
-				if flickr_photos['photoset']['primary'] == flickr_photo['id']
-					set['primary_photo'] = {
+				if flickr_photo['tags'].split(" ").include?(FLICKR_INCLUDE_TAG)
+					set['photos'].push({
 						'id' => flickr_photo['id'],
 						'title' => flickr_photo['title'],
 						'url_large' => flickr_photo['url_l'],
 						'url_medium' => flickr_photo['url_m'],
 						'url_small' => flickr_photo['url_s'],
 						'create_date' => flickr_photo['dateupload']
-					}
+					})
+					if flickr_set['primary'] == flickr_photo['id']
+						set['primary_photo'] = {
+							'id' => flickr_photo['id'],
+							'title' => flickr_photo['title'],
+							'url_large' => flickr_photo['url_l'],
+							'url_medium' => flickr_photo['url_m'],
+							'url_small' => flickr_photo['url_s'],
+							'create_date' => flickr_photo['dateupload']
+						}
+					end
 				end
 			end
 			set['photos'] = set['photos'].sort_by {|photo| photo['create_date']}
 			new_photosets.push(set)
 		end
-
 		@photosets = new_photosets.dup.sort {|first, second| second['id'] <=> first['id']}
 	end
 
@@ -115,7 +117,7 @@ module Flickr
 	end
 
 	def self.get_photos_by_photoset(photoset_id)
-		uri = URI("http://api.flickr.com/services/rest/?api_key=#{API_KEY}&method=flickr.photosets.getPhotos&format=json&photoset_id=#{photoset_id}&extras=url_l,url_m,url_s,date_upload")
+		uri = URI("http://api.flickr.com/services/rest/?api_key=#{API_KEY}&method=flickr.photosets.getPhotos&format=json&photoset_id=#{photoset_id}&extras=url_l,url_m,url_s,date_upload,tags")
 		body = Net::HTTP.get_response(uri).body
 		body.slice!('jsonFlickrApi(')
 		return JSON.parse(body[0...-1])
