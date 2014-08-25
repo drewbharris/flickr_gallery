@@ -2,6 +2,7 @@ require 'json'
 require 'net/http'
 require 'rufus-scheduler'
 require 'pp'
+require 'open-uri'
 
 module Flickr
 
@@ -19,13 +20,11 @@ module Flickr
 
 		# load the photos from the database
 		restore
+		fetch
+		persist
 
 		# every 12 hours, fetch the photosets again
 		@scheduler = Rufus::Scheduler.new
-
-		@scheduler.in '10s' do
-			update
-		end
 
 		@scheduler.every '12h' do
 			update
@@ -72,6 +71,7 @@ module Flickr
 				'create_date_str' => Time.at(flickr_set['date_create'].to_i).strftime("%m.%d.%Y"),
 				'description' => flickr_set['description']['_content']
 			}
+			puts "Got photoset #{set['short_title']}"
 			# fetch and add in the photos
 			flickr_photos = get_photos_by_photoset(flickr_set['id'])
 			flickr_photos['photoset']['photo'].each do |flickr_photo|
@@ -106,22 +106,28 @@ module Flickr
 	end
 
 	def self.get_user_id
-		uri = URI("http://api.flickr.com/services/rest/?api_key=#{API_KEY}&username=#{USERNAME}&method=flickr.people.findByUsername&format=json")
-		body = Net::HTTP.get_response(uri).body
+		# uri = URI("http://api.flickr.com/services/rest/?api_key=#{API_KEY}&username=#{USERNAME}&method=flickr.people.findByUsername&format=json")
+		# body = Net::HTTP.get_response(uri).body
+		url = "https://api.flickr.com/services/rest/?api_key=#{API_KEY}&username=#{USERNAME}&method=flickr.people.findByUsername&format=json"
+		body = URI.parse(url).read
 		body.slice!('jsonFlickrApi(')
 		return JSON.parse(body[0...-1])['user']['nsid']
 	end
 
 	def self.get_photosets(nsid)
-		uri = URI("http://api.flickr.com/services/rest/?api_key=#{API_KEY}&method=flickr.photosets.getList&format=json&user_id=#{nsid}")
-		body = Net::HTTP.get_response(uri).body
+		# uri = URI("http://api.flickr.com/services/rest/?api_key=#{API_KEY}&method=flickr.photosets.getList&format=json&user_id=#{nsid}")
+		# body = Net::HTTP.get_response(uri).body
+		url = "https://api.flickr.com/services/rest/?api_key=#{API_KEY}&method=flickr.photosets.getList&format=json&user_id=#{nsid}"
+		body = URI.parse(url).read
 		body.slice!('jsonFlickrApi(')
 		return JSON.parse(body[0...-1])
 	end
 
 	def self.get_photos_by_photoset(photoset_id)
-		uri = URI("http://api.flickr.com/services/rest/?api_key=#{API_KEY}&method=flickr.photosets.getPhotos&format=json&photoset_id=#{photoset_id}&extras=url_l,url_m,url_s,date_upload,tags")
-		body = Net::HTTP.get_response(uri).body
+		# uri = URI("http://api.flickr.com/services/rest/?api_key=#{API_KEY}&method=flickr.photosets.getPhotos&format=json&photoset_id=#{photoset_id}&extras=url_l,url_m,url_s,date_upload,tags")
+		# body = Net::HTTP.get_response(uri).body
+		url = "https://api.flickr.com/services/rest/?api_key=#{API_KEY}&method=flickr.photosets.getPhotos&format=json&photoset_id=#{photoset_id}&extras=url_l,url_m,url_s,date_upload,tags"
+		body = URI.parse(url).read
 		body.slice!('jsonFlickrApi(')
 		return JSON.parse(body[0...-1])
 	end
